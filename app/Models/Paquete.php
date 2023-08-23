@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Paquete extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'descripcion',
+        'peso_kg',
+        'lote_id'
+    ];
+
+    protected $table = 'paquetes';
+    protected $primaryKey = 'id';
+    public $incrementing = true; 
 }

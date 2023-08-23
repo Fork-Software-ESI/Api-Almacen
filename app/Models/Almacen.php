@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Almacen extends Model
 {
     use HasFactory;
+    protected $fillable = ['direccion'];
+    
+    protected $primaryKey = 'id';
+
+    protected $table='almacenes';
 }
