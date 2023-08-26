@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\PaqueteController;
+use App\Http\Controllers\LoteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/paquetes/alta', ([PaqueteController::class, 'altaPaquete']))->name('paquete.alta');
+Route::patch('/paquetes/editar/{id}', ([PaqueteController::class, 'editarPaquete']))->name('paquete.editar');
+Route::get('/paquetes', ([PaqueteController::class, 'listarPaquetes']))->name('paquete.listar');
+
+Route::post('/lotes/alta', ([LoteController::class, 'altaLote']))->name('lote.alta');
+Route::patch('/lotes/editar/{id}', ([LoteController::class, 'editarLote']))->name('lote.editar');
+Route::get('/lotes', ([LoteController::class, 'listarLotes']))->name('lote.listar');
