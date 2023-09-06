@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Lote;
@@ -46,5 +47,24 @@ class LoteController extends Controller
     {
         $lotes = Lote::all();
         return response()->json(['message' => 'Lotes listados', 'datos' => $lotes], 200);
+    }
+
+    public function buscarLote($id)
+    {
+        $lote = Lote::find($id);
+        if (!$lote) {
+            return response()->json(['message' => 'Lote no encontrado'], 404);
+        }
+        return response()->json(['message' => 'Lote encontrado', 'datos' => $lote], 200);
+    }
+
+    public function eliminarLote($id)
+    {
+        $lote = Lote::find($id);
+        if (!$lote) {
+            return response()->json(['message' => 'Lote no encontrado'], 404);
+        }
+        $lote->deleted_at = Carbon::now();
+        return response()->json(['message' => 'Lote eliminado'], 200);
     }
 }

@@ -11,7 +11,8 @@ class Paquete extends Model
     protected $fillable = [
         'descripcion',
         'peso_kg',
-        'lote_id'
+        'lote_id',
+        'estanteria_id',
     ];
 
     protected $table = 'paquetes';
