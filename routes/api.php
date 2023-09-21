@@ -26,4 +26,6 @@ Route::post('/crearRelacionForma', [GerenteController::class, 'crearRelacionForm
 
 Route::post('/paqueteEstante', [FuncionarioController::class, 'paqueteEstante'])->name('funcionario.paqueteEstante');
 
+Route::post('/paqueteLote', [FuncionarioController::class, 'paqueteLote'])->name('funcionario.paqueteLote');
 
+Route::post('/loteCamion', [FuncionarioController::class, 'loteCamion'])->name('funcionario.loteCamion');
