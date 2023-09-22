@@ -9,18 +9,12 @@ use App\Models\Cliente;
 use App\Models\Lote;
 use App\Models\Forma;
 use App\Models\LoteCamion;
+use App\Models\Camion;
+use App\Models\Chofer;
+use App\Models\ChoferCamion;
 
 class GerenteController extends Controller
 {
-    /*
-    gerente
-    crea paquete
-    crea lote
-    crea en la relacion forma (paquete lote)
-    crea en la relación lote_camion (lote camion)
-    crea en la relación chofer_camion
-    */
-
     public function crearPaquete(Request $request){
         $validator = Validator::make($request->all(), [
             'ID_Cliente' => 'required',
@@ -43,8 +37,6 @@ class GerenteController extends Controller
         $paquete = Paquete::create($validatedData);
         $paquete -> save();
         $id_paquete = $paquete->ID;
-
-        //dd($id_paquete);
 
         if(!empty($request -> ID_Lote)){
             $lote = Lote::find($request->ID_Lote);
@@ -92,6 +84,59 @@ class GerenteController extends Controller
     }
 
     public function choferCamion(Request $request){
+        $validator = Validator::make($request->all(), [
+            'ID_Camion' => 'required',
+            'ID_Chofer' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $validatedData = $validator->validated();
+
+        $chofer = Chofer::find($request->ID_Chofer);
+
+        if(!$chofer){
+            return response()->json(['error' => 'Chofer no encontrado'], 400);
+        }
+
+        $camion = Camion::find($request->ID_Camion);
+
+        if(!$camion){
+            return response()->json(['error' => 'Camion no encontrado'], 400);
+        }
+
+        $existe = ChoferCamion::where('ID_Camion', $request->ID_Camion)->where('ID_Chofer', $request->ID_Chofer)->first();
         
+        if($existe){
+            return response()->json(['error' => 'El chofer ya esta asignado a ese camion'], 400);
+        }
+
+        $ninguno_camion = ChoferCamion::where('ID_Camion', $request->ID_Camion)->first();
+        $ninguno_chofer = ChoferCamion::where('ID_Chofer', $request->ID_Chofer)->first();
+
+        if($ninguno_camion && $ninguno_chofer){
+            return response()->json(['error' => 'Ninguno de los dos esta disponible'], 400);
+        }
+
+        $chofer_camion = ChoferCamion::where('ID_Camion', $request->ID_Camion)->first();
+
+        if($chofer_camion){
+            return response()->json(['error' => 'Camion no disponible'], 400);
+        }
+
+        $chofer_camion = ChoferCamion::where('ID_Chofer', $request->ID_Chofer)->first();
+
+        if($chofer_camion){
+            return response()->json(['error' => 'Chofer no disponible'], 400);
+        }
+
+        $chofer_camion = new ChoferCamion;
+        $chofer_camion->ID_Camion = $request->ID_Camion;
+        $chofer_camion->ID_Chofer = $request->ID_Chofer;
+        $chofer_camion->Estado = "Pendiente";
+        $chofer_camion->save();
+
+        return response()->json(['Datos' => $chofer_camion], 200);
     }
 }

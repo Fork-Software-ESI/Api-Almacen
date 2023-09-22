@@ -22,10 +22,13 @@ Route::post('/crearPaquete', [GerenteController::class, 'crearPaquete'])->name('
 
 Route::post('/crearLote', [GerenteController::class, 'crearLote'])->name('gerente.crearLote');
 
-Route::post('/crearRelacionForma', [GerenteController::class, 'crearRelacionForma'])->name('gerente.crearRelacionForma');
+Route::post('/choferCamion', [GerenteController::class, 'choferCamion'])->name('funcionario.camionChofer');
+
+//
 
 Route::post('/paqueteEstante', [FuncionarioController::class, 'paqueteEstante'])->name('funcionario.paqueteEstante');
 
 Route::post('/paqueteLote', [FuncionarioController::class, 'paqueteLote'])->name('funcionario.paqueteLote');
 
 Route::post('/loteCamion', [FuncionarioController::class, 'loteCamion'])->name('funcionario.loteCamion');
+
