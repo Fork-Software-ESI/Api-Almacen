@@ -13,6 +13,37 @@ use App\Models\ChoferCamion;
 
 class FuncionarioController extends Controller
 {
+
+    public function verPaquete (){
+        $paquetes = Paquete::all();
+        return response()->json(['Paquetes' => $paquetes], 200);
+    }
+
+    public function verLote(){
+        $lotes = LoteCamion::all();
+        return response()->json(['Lotes' => $lotes], 200);
+    }
+
+    public function verPaqueteLote(){
+        $paquetes = Forma::all();
+        return response()->json(['Paquetes en lote' => $paquetes], 200);
+    }
+
+    public function verEstante(){
+        $estantes = Estante::all();
+        return response()->json(['Estantes' => $estantes], 200);
+    }  
+    
+    public function verPaqueteEstante(){
+        $paquetes = PaqueteEstante::all();
+        return response()->json(['Paquetes en estante' => $paquetes], 200);
+    }
+
+    public function verLoteCamion(){
+        $lotes = LoteCamion::all();
+        return response()->json(['Lotes en camion' => $lotes], 200);
+    }   
+
     public function paqueteEstante(Request $request){
         $validator = Validator::make($request->all(), [
             'ID_Paquete' => 'required',
@@ -67,7 +98,7 @@ class FuncionarioController extends Controller
     public function loteCamion(Request $request){
         $validator = Validator::make($request->all(), [
             'ID_Lote' => 'required',
-            'Estado' => 'required'     //Cargado, En transito, Pendiente, Entregado
+            'Estado' => 'required|in:Cargado,En transito,Pendiente,Entregado'
         ]);
 
         if ($validator->fails()) {
