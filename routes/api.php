@@ -16,49 +16,11 @@ use App\Http\Controllers\GerenteController;
 |
 */
 
-Route::post('/login','App\Http\Controllers\AuthController@login');
-
-Route::get('/verPaquete', [GerenteController::class, 'verPaquete'])->name('gerente.verPaquete');
-
-Route::get('/verLote', [GerenteController::class, 'verLote'])->name('gerente.verLote');
-
-Route::get('/verCamion', [GerenteController::class, 'verCamion'])->name('gerente.verCamion');
-
-Route::get('/verChofer', [GerenteController::class, 'verChofer'])->name('gerente.verChofer');
-
-Route::get('/verLoteCamion', [GerenteController::class, 'verLoteCamion'])->name('gerente.verLoteCamion');
-
-Route::get('/verPaqueteLote', [GerenteController::class, 'verPaqueteLote'])->name('gerente.verPaqueteLote');
-
-Route::get('/verChoferCamion', [GerenteController::class, 'verChoferCamion'])->name('gerente.verChoferCamion');
-
-Route::post('/crearPaquete', [GerenteController::class, 'crearPaquete'])->name('gerente.crearPaquete');
-
-Route::post('/crearLote', [GerenteController::class, 'crearLote'])->name('gerente.crearLote');
-
-Route::post('/loteCamion',[GerenteController::class, 'loteCamion'])->name('gerente.loteCamion');;
-
-Route::post('/paquteLote', [GerenteController::class, 'paqueteLote'])->name('gerente.paqueteLote');
-
-Route::post('/choferCamion', [GerenteController::class, 'choferCamion'])->name('funcionario.camionChofer');
-
-//
-
-Route::get('/verPaquete', [FuncionarioController::class, 'verPaquete'])->name('funcionario.verPaquete');
-
-Route::get('/verLote', [FuncionarioController::class, 'verLote'])->name('funcionario.verLote');
-
-Route::get('/verPaqueteLote', [FuncionarioController::class, 'verPaqueteLote'])->name('funcionario.verPaqueteLote');
-
-Route::get('/verEstante', [FuncionarioController::class, 'verEstante'])->name('funcionario.verEstante');
-
-Route::get('/verPaqueteEstante', [FuncionarioController::class, 'verPaqueteEstante'])->name('funcionario.verPaqueteEstante');
-
-Route::get('/verLoteCamion', [FuncionarioController::class, 'verLoteCamion'])->name('funcionario.verLoteCamion');
-
-Route::post('/paqueteEstante', [FuncionarioController::class, 'paqueteEstante'])->name('funcionario.paqueteEstante');
-
-Route::post('/paqueteLote', [FuncionarioController::class, 'paqueteLote'])->name('funcionario.paqueteLote');
-
-Route::post('/loteCamion', [FuncionarioController::class, 'loteCamion'])->name('funcionario.loteCamion');
-
+Route::prefix('/v1')->group(function () {
+    Route::post('/paquete', [GerenteController::class, 'crearPaquete']);
+    Route::get('/paquetes', [GerenteController::class, 'listarPaquetes']);
+    Route::get('/paquete', [GerenteController::class, 'buscarPaquete']);
+    Route::post('/paquete/estante', [GerenteController::class, 'registrarPaqueteEstante']);
+    Route::patch('/paquete/estante', [GerenteController::class, 'trasladarPaqueteEstante']);
+    Route::delete('/paquete/estante', [GerenteController::class, 'quitarPaqueteDeEstante']);
+});
