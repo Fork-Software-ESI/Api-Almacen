@@ -31,7 +31,7 @@ class Paquete extends Model
 {
 	protected $table = 'paquete';
 	protected $primaryKey = 'ID';
-	public $timestamps = false;
+	public $timestamps = true;
 
 	protected $casts = [
 		'ID_Cliente' => 'int',
@@ -40,10 +40,12 @@ class Paquete extends Model
 
 	protected $fillable = [
 		'ID_Cliente',
+		'ID_Estado',
 		'Descripcion',
 		'Peso_Kg',
 		'Estado',
-		'Destino'
+		'Destino',
+		'Codigo'
 	];
 
 	public function cliente()

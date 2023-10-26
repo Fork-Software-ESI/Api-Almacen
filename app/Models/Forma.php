@@ -26,7 +26,7 @@ class Forma extends Model
 	protected $table = 'forma';
 	protected $primaryKey = 'ID_Paquete';
 	public $incrementing = false;
-	public $timestamps = false;
+	public $timestamps = true;
 
 	protected $casts = [
 		'ID_Lote' => 'int',

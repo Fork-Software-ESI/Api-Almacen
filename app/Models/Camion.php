@@ -26,7 +26,7 @@ class Camion extends Model
 {
 	protected $table = 'camion';
 	protected $primaryKey = 'ID';
-	public $timestamps = false;
+	public $timestamps = true;
 
 	protected $casts = [
 		'PesoMaximoKg' => 'int'

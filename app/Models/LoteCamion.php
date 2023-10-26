@@ -28,7 +28,7 @@ class LoteCamion extends Model
 	protected $table = 'lote_camion';
 	protected $primaryKey = 'ID_Lote';
 	public $incrementing = false;
-	public $timestamps = false;
+	public $timestamps = true;
 
 	protected $casts = [
 		'ID_Camion' => 'int',

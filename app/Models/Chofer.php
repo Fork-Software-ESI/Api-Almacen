@@ -25,8 +25,11 @@ class Chofer extends Model
 	protected $table = 'chofer';
 	protected $primaryKey = 'ID';
 	public $incrementing = false;
-	public $timestamps = false;
+	public $timestamps = true;
 
+	protected $fillable = [
+		'ID'
+	];
 	protected $casts = [
 		'ID' => 'int'
 	];
@@ -39,7 +42,7 @@ class Chofer extends Model
 	public function camions()
 	{
 		return $this->belongsToMany(Camion::class, 'chofer_camion', 'ID_Chofer', 'ID_Camion')
-					->withPivot('Fecha_Hora_Inicio', 'Estado');
+					->withPivot('Fecha_Hora_Inicio');
 	}
 
 	public function chofer_tipo_libreta()

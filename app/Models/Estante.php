@@ -23,7 +23,9 @@ use Illuminate\Database\Eloquent\Model;
 class Estante extends Model
 {
 	protected $table = 'estante';
-	public $timestamps = false;
+	protected $primaryKey = ['ID', 'ID_Almacen'];
+	public $incrementing = false;
+	public $timestamps = true;
 
 	protected $casts = [
 		'ID_Almacen' => 'int'

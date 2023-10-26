@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $ID_Chofer
  * @property int $ID_Camion
  * @property Carbon $Fecha_Hora_Inicio
- * @property string $Estado
  * 
  * @property Camion $camion
  * @property Chofer $chofer
@@ -27,9 +26,7 @@ class ChoferCamion extends Model
 {
 	protected $table = 'chofer_camion';
 	public $incrementing = false;
-	public $timestamps = false;
-
-	//protected $primaryKey = null;
+	public $timestamps = true;
 
 	protected $casts = [
 		'ID_Chofer' => 'int',
@@ -38,8 +35,7 @@ class ChoferCamion extends Model
 	];
 
 	protected $fillable = [
-		'Fecha_Hora_Inicio',
-		'Estado'
+		'Fecha_Hora_Inicio'
 	];
 
 	public function camion()

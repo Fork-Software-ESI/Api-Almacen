@@ -9,6 +9,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+
 /**
  * Class Almacen
  * 
@@ -25,7 +26,7 @@ class Almacen extends Model
 {
 	protected $table = 'almacen';
 	protected $primaryKey = 'ID';
-	public $timestamps = false;
+	public $timestamps = true;
 
 	protected $fillable = [
 		'Direccion'

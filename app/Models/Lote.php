@@ -26,7 +26,7 @@ class Lote extends Model
 {
 	protected $table = 'lote';
 	protected $primaryKey = 'ID';
-	public $timestamps = false;
+	public $timestamps = true;
 
 	protected $casts = [
 		'Peso_Kg' => 'int'
