@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Lote extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'lote';
 	protected $primaryKey = 'ID';
 	public $timestamps = true;

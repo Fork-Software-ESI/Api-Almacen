@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Forma extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'forma';
 	protected $primaryKey = 'ID_Paquete';
 	public $incrementing = false;
@@ -34,8 +35,9 @@ class Forma extends Model
 	];
 
 	protected $fillable = [
+		'ID_Paquete',
 		'ID_Lote',
-		'Estado'
+		'ID_Estado'
 	];
 
 	public function lote()

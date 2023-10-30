@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Paquete extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'paquete';
 	protected $primaryKey = 'ID';
 	public $timestamps = true;

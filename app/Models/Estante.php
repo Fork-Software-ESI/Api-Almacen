@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Estante extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'estante';
 	protected $primaryKey = ['ID', 'ID_Almacen'];
 	public $incrementing = false;

@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LoteCamion extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'lote_camion';
 	protected $primaryKey = 'ID_Lote';
 	public $incrementing = false;

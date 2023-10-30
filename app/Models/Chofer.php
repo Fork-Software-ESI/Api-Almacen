@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Chofer extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'chofer';
 	protected $primaryKey = 'ID';
 	public $incrementing = false;

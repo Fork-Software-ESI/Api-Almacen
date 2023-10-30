@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Camion extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'camion';
 	protected $primaryKey = 'ID';
 	public $timestamps = true;

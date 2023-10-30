@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Cliente extends Model
 {
+	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $table = 'cliente';
 	protected $primaryKey = 'ID';
 	public $incrementing = false;
