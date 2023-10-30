@@ -16,11 +16,18 @@ use App\Http\Controllers\GerenteController;
 |
 */
 
-Route::prefix('/v1')->group(function () {
-    Route::post('/paquete', [GerenteController::class, 'crearPaquete']);
-    Route::get('/paquetes', [GerenteController::class, 'listarPaquetes']);
-    Route::get('/paquete', [GerenteController::class, 'buscarPaquete']);
-    Route::post('/paquete/estante', [GerenteController::class, 'registrarPaqueteEstante']);
-    Route::patch('/paquete/estante', [GerenteController::class, 'trasladarPaqueteEstante']);
-    Route::delete('/paquete/estante', [GerenteController::class, 'quitarPaqueteDeEstante']);
-});
+Route::post('/paquetes', [GerenteController::class, 'crearPaquete']);
+Route::get('/paquetes/{id}', [GerenteController::class, 'listarPaquetesAlmacen']);
+Route::get('/paquetes', [GerenteController::class, 'buscarPaquete']);
+Route::patch('/paquetes', [GerenteController::class, 'editarPaquete']);
+Route::delete('/paquetes/{id}', [GerenteController::class, 'eliminarPaquete']);
+
+Route::post('/paquetes/estante', [GerenteController::class, 'registrarPaqueteEstante']);
+Route::patch('/paquetes/estante', [GerenteController::class, 'trasladarPaqueteEstante']);
+Route::delete('/paquetes/estante', [GerenteController::class, 'quitarPaqueteDeEstante']);
+
+Route::post('/lotes', [GerenteController::class, 'crearLote']);
+Route::get('/lotes', [GerenteController::class, 'listarLotes']);
+Route::post('/lotes/asignar', [GerenteController::class, 'asignarPaqueteLote']);
+Route::patch('/lotes', [GerenteController::class, 'editarLote']);
+Route::delete('/lotes/{id}', [GerenteController::class, 'eliminarLote']);
