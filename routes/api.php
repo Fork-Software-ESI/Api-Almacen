@@ -31,3 +31,14 @@ Route::get('/lotes', [GerenteController::class, 'listarLotes']);
 Route::post('/lotes/asignar', [GerenteController::class, 'asignarPaqueteLote']);
 Route::patch('/lotes', [GerenteController::class, 'editarLote']);
 Route::delete('/lotes/{id}', [GerenteController::class, 'eliminarLote']);
+
+Route::get('/choferes', [GerenteController::class, 'verChoferes']);
+Route::get('/choferes/disponibles', [GerenteController::class, 'verChoferesDisponibles']);
+Route::get('/choferes/ocupados', [GerenteController::class, 'listarChoferesCamiones']);
+
+Route::get('/camiones', [GerenteController::class, 'verCamiones']);
+Route::get('/camiones/sinchofer', [GerenteController::class, 'verCamionesSinChofer']);
+Route::get('/camiones/disponibles', [GerenteController::class, 'verCamionesDisponibles']);
+Route::post('/camiones/asignar', [GerenteController::class, 'asignarChoferCamion']);
+Route::post('/camiones/plataformas', [GerenteController::class, 'verCamionesEnPlataformas']);
+Route::get('/camiones/transito', [GerenteController::class, 'verCamionesEnTransito']);
