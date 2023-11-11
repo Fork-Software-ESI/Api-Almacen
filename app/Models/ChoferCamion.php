@@ -36,6 +36,9 @@ class ChoferCamion extends Model
 	];
 
 	protected $fillable = [
+		'ID_Chofer',
+		'ID_Camion',
+		'ID_Estado',
 		'Fecha_Hora_Inicio'
 	];
 
