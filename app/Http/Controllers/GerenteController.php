@@ -19,6 +19,8 @@ use App\Models\CamionPlataforma;
 use App\Models\CamionPlataformaSalida;
 use App\Models\GerenteLote;
 use App\Models\GerenteAlmacen;
+use App\Models\GerentePaquete;
+use App\Models\GerenteForma;
 
 class GerenteController extends Controller
 {
@@ -58,10 +60,10 @@ class GerenteController extends Controller
     public function crearPaquete(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'ID_Gerente' => 'required|exists:gerente_almacen,ID_Gerente',
             'Descripcion' => 'string',
             'Peso_Kg' => 'required|numeric|min:1',
             'ID_Cliente' => 'required|exists:cliente,ID',
-            'ID_Estado' => 'required|exists:estadop,ID',
             'Calle' => 'required|string',
             'Numero_Puerta' => 'required|string',
             'Ciudad' => 'required|string',
@@ -72,6 +74,12 @@ class GerenteController extends Controller
         }
 
         $validatedData = $validator->validated();
+
+        $gerente = GerenteAlmacen::where('ID_Gerente', $validatedData['ID_Gerente'])->first();
+
+        if ($gerente == null) {
+            return response()->json(['error' => 'Gerente no encontrado'], 404);
+        }
 
         $direccion = $validatedData['Calle'] . ' ' . $validatedData['Numero_Puerta'] . ', ' . $validatedData['Ciudad'];
 
@@ -87,9 +95,16 @@ class GerenteController extends Controller
             $validatedData['Codigo'] = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 6);
         }
 
-        Paquete::create($validatedData);
+        $validatedData['ID_Estado'] = 1;
 
-        return response()->json(['success' => 'Paquete creado, código: ' . $validatedData['Codigo']], 200);
+        $paqueteCreado = Paquete::create($validatedData);
+
+        GerentePaquete::create([
+            'ID_Gerente' => $gerente->ID_Gerente,
+            'ID_Paquete' => $paqueteCreado->ID
+        ]);
+
+        return response()->json(['success' => 'Paquete creado, código: ' . $paqueteCreado->Codigo], 200);
     }
 
     public function eliminarPaquete($id)
@@ -161,9 +176,9 @@ class GerenteController extends Controller
         $validatedData = $validator->validated();
 
         if (isset($validatedData['Codigo'])) {
-            $paquete = Paquete::where('Codigo', $validatedData['Codigo'])->first();
+            $paquete = Paquete::withTrashed()->where('Codigo', $validatedData['Codigo'])->first();
         } else {
-            $paquete = Paquete::where('ID_Cliente', $validatedData['ID_Cliente'])->get();
+            $paquete = Paquete::withTrashed()->where('ID_Cliente', $validatedData['ID_Cliente'])->get();
         }
 
         if ($paquete == null) {
@@ -209,11 +224,9 @@ class GerenteController extends Controller
 
         $validatedData = $validator->validated();
 
-        // Busca el gerente en el modelo GerenteAlmacen
         $gerente = GerenteAlmacen::where('ID_Gerente', $validatedData['ID_Gerente'])->first();
 
-        // Obtiene todos los lotes del gerente
-        $lotes = $gerente->gerente_lotes()->with('lote')->get()->pluck('lote');
+        $lotes = $gerente->gerente_lotes()->with('lote')->get()->pluck('lote')->whereNull('deleted_at')->whereIn('ID_Estado', [1, 2]);
 
         return response()->json(['data' => $lotes], 200);
     }
@@ -221,9 +234,9 @@ class GerenteController extends Controller
     public function asignarPaqueteLote(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'ID_Gerente' => 'required|exists:gerente_almacen,ID_Gerente',
             'ID_Paquete' => 'required|exists:paquete,ID',
             'ID_Lote' => 'required|exists:lote,ID',
-            'ID_Estado' => 'required|exists:estadof,ID',
         ]);
 
         if ($validator->fails()) {
@@ -232,12 +245,17 @@ class GerenteController extends Controller
 
         $validatedData = $validator->validated();
 
+        $gerente = GerenteAlmacen::where('ID_Gerente', $validatedData['ID_Gerente'])->first();
+
+        if (!$gerente) {
+            return response()->json(['error' => 'Gerente no encontrado'], 404);
+        }
+
         try {
             $paquete = Paquete::where('ID', $validatedData['ID_Paquete'])->whereNull('deleted_at')->firstOrFail();
             $lote = Lote::where('ID', $validatedData['ID_Lote'])->whereNull('deleted_at')->firstOrFail();
-            $estado = EstadoF::where('ID', $validatedData['ID_Estado'])->whereNull('deleted_at')->firstOrFail();
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Paquete, lote o estado no encontrado'], 404);
+            return response()->json(['error' => 'Paquete o lote no encontrado'], 404);
         }
 
         if (Forma::where('ID_Paquete', $validatedData['ID_Paquete'])->whereNull('deleted_at')->first() !== null) {
@@ -248,13 +266,28 @@ class GerenteController extends Controller
             return response()->json(['error' => 'Lote no disponible'], 422);
         }
 
+        $gerenteRegistraPaquete = GerentePaquete::where('ID_Paquete', $paquete->ID)->whereNull('deleted_at')->first();
+        $gerenteRegistraLote = GerenteLote::where('ID_Lote', $lote->ID)->whereNull('deleted_at')->first();
+
+        $gerentePaquete = GerenteAlmacen::where('ID_Gerente', $gerenteRegistraPaquete->ID_Gerente)->whereNull('deleted_at')->first();
+        $gerenteLote = GerenteAlmacen::where('ID_Gerente', $gerenteRegistraLote->ID_Gerente)->whereNull('deleted_at')->first();
+
+        if ($gerentePaquete->ID_Almacen != $gerenteLote->ID_Almacen) {
+            return response()->json(['error' => 'El paquete y el lote no pertenecen al mismo almacén'], 422);
+        }
+
         Forma::create([
             'ID_Lote' => $validatedData['ID_Lote'],
             'ID_Paquete' => $validatedData['ID_Paquete'],
-            'ID_Estado' => $validatedData['ID_Estado'],
+            'ID_Estado' => 1
         ]);
 
-        return response()->json(['success' => 'Paquete ' . $paquete->ID . ' asignado a lote ' . $lote->ID . ' con estado ' . $estado->Estado], 200);
+        GerenteForma::create([
+            'ID_Gerente' => $gerente->ID_Gerente,
+            'ID_Paquete' => $paquete->ID
+        ]);
+
+        return response()->json(['success' => 'Paquete ' . $paquete->ID . ' asignado a lote ' . $lote->ID], 200);
     }
 
     public function editarLote(Request $request)
@@ -444,6 +477,30 @@ class GerenteController extends Controller
         ], 200);
     }
 
+    public function buscarCamion(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ID_Camion' => 'exists:camion,ID',
+            'Matricula' => 'string|exists:camion,Matricula',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        if ($request->ID_Camion) {
+            $camion = Camion::where('ID', $request->ID_Camion)->first();
+        } else {
+            $camion = Camion::where('Matricula', $request->Matricula)->first();
+        }
+
+        if (!$camion) {
+            return response()->json(['error' => 'Camión no encontrado'], 404);
+        }
+
+        return response()->json(['Camion' => $camion], 200);
+    }
+
     public function asignarLoteCamion(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -460,7 +517,6 @@ class GerenteController extends Controller
         try {
             $lote = Lote::where('ID', $validatedData['ID_Lote'])->whereNull('deleted_at')->firstOrFail();
             $camion = ChoferCamion::where('ID_Camion', $validatedData['ID_Camion'])->whereNull('deleted_at')->firstOrFail();
-            return response()->json(['Camion' => $camion], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Lote o camión no encontrado'], 404);
         }
@@ -469,14 +525,40 @@ class GerenteController extends Controller
             return response()->json(['error' => 'Lote no disponible'], 422);
         }
 
-        if ($camion->ID_Estado != 1 || $camion->ID_Estado != 2) {
-            return response()->json(['error' => 'Camión no disponible'], 422);
+        $response = $this->verCamionesDisponibles();
+        $camionesDisponiblesData = json_decode($response->getContent(), true);
+        $camionesDisponibles = $camionesDisponiblesData['Camiones disponibles'];
+        $camionDeseado = null;
+
+        foreach ($camionesDisponibles as $camion) {
+            if ($camion['ID_Camion'] == $validatedData['ID_Camion']) {
+                $camionDeseado = $camion;
+                break;
+            }
         }
 
-        $reponse = $this->verCamionesDisponibles();
-        $camionesDisponiblesData = json_decode($reponse->getContent());
+        if ($camionDeseado === null) {
+            return response()->json(['error' => 'Camión no disponible'], 404);
+        }
 
-        return response()->json(['Camiones disponibles' => $camionesDisponiblesData], 200);
+        $loteEnCamion = LoteCamion::where('ID_Lote', $validatedData['ID_Lote'])->whereNull('deleted_at')->first();
+        if ($loteEnCamion !== null) {
+            return response()->json(['error' => 'Lote ya asignado a un camión'], 422);
+        }
 
+        $pesoTotalKg = LoteCamion::where('ID_Camion', $validatedData['ID_Camion'])->whereNull('deleted_at')->sum('Peso_Kg') + $lote->Peso_Kg;
+        if ($pesoTotalKg > $camionDeseado['PesoMaximoKg']) {
+            return response()->json(['error' => 'El peso total asignado al camión es superior al límite permitido'], 422);
+        }
+
+        $loteCamionCreado = LoteCamion::create([
+            'ID_Lote' => $validatedData['ID_Lote'],
+            'ID_Camion' => $validatedData['ID_Camion'],
+            'Fecha_Hora_Inicio' => now(),
+            'ID_Estado' => 1,
+            'Peso_Kg' => $lote->Peso_Kg,
+        ]);
+
+        return response()->json(['success' => 'Lote ' . $loteCamionCreado->ID_Lote . ' asignado a camión ' . $loteCamionCreado->ID_Camion], 200);
     }
 }
