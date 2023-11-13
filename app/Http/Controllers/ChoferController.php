@@ -12,8 +12,7 @@ use App\Models\Paquete;
 use App\Models\Camion;
 use App\Models\CamionPlataforma;
 use App\Models\CamionPlataformaSalida;
-use App\Models\Almacen;
-use App\Models\Plataforma;
+use App\Models\ChoferCamionManeja;
 
 class ChoferController extends Controller
 {
@@ -105,5 +104,25 @@ class ChoferController extends Controller
         ChoferCamion::where('ID_Camion', $camion->ID)->update(['ID_Estado' => 4]);
         
         return response()->json(['mensaje','Se a marcado la hora exitosamente']);
+    }
+
+    public function liberarCamion(Request $request)
+    {
+        $ID_Chofer = $request->input('ID_Chofer');
+
+        $chofer = Chofer::find($ID_Chofer);
+
+        if(!$chofer){
+            return response()->json(['mensaje' => 'Chofer no encontrado'], 402);
+        }
+
+        $choferCamion = ChoferCamion::where('ID_Chofer', $ID_Chofer)->first();
+        if(!$choferCamion){
+            return response()->json(['mensaje' => 'Chofer no tiene camión asignado'], 402);
+        }
+
+        ChoferCamionManeja::where('ID_Chofer', $ID_Chofer)->update(['Fecha_Hora_Fin' => now()]);
+
+        return response()->json(['mensaje' => 'Chofer ha sido liberado']);
     }
 }

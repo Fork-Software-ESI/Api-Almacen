@@ -56,4 +56,5 @@ Route::prefix('funcionario')->group(function () {
 Route::prefix('chofer')->group(function () {
     Route::get('/camion/{id}', [ChoferController::class, 'verContenidoCamion']);
     Route::post('/camion/plataforma', [ChoferController::class, 'marcarHora']);
+    Route::post('/camion/liberar', [ChoferController::class, 'liberarCamion']);
 });
