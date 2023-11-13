@@ -125,4 +125,97 @@ class ChoferController extends Controller
 
         return response()->json(['mensaje' => 'Chofer ha sido liberado']);
     }
+
+    public function estadoCamion(Request $request)
+    {
+        $matricula = $request->input('matricula');
+        $camion = Camion::where('Matricula', $matricula)->first();
+
+        if (!$camion) {
+            return response()->json(['mensaje' => 'Camión no encontrado'], 402);
+        }
+
+        $loteCamion = LoteCamion::where('ID_Camion', $camion->ID)->first();
+        $choferCamion = ChoferCamion::where('ID_Camion', $camion->ID)->first();
+
+        if($loteCamion){
+            return $this->loteCamion($loteCamion, $choferCamion);
+        }
+
+        return $this->estadoNoTieneLote($camion);
+    }
+
+
+    private function estadoLoteCamion($loteCamion)
+    {
+        $estadoLoteCamion = $loteCamion->ID_Estado;
+        if($estadoLoteCamion == 1) {
+            $estadoLoteCamion = 'Pendiente';
+        } 
+        if($estadoLoteCamion == 2) {
+            $estadoLoteCamion = 'Cargado';
+        }
+        if($estadoLoteCamion == 3) {
+            $estadoLoteCamion = 'Entregado';
+        }
+
+        return $estadoLoteCamion;
+    }
+
+    private function estadoChoferCamion($choferCamion)
+    {
+        $estadoChoferCamion = $choferCamion->ID_Estado;
+        if($estadoChoferCamion == 1) {
+            $estadoChoferCamion = 'Estacionado';
+        }
+        if($estadoChoferCamion == 2) {
+            $estadoChoferCamion = 'En plataforma';
+        }
+        if($estadoChoferCamion == 3) {
+            $estadoChoferCamion = 'Cargado';
+        }
+        if($estadoChoferCamion == 4) {
+            $estadoChoferCamion = 'En transito';
+        }
+        if($estadoChoferCamion == 5) {
+            $estadoChoferCamion = 'Completado';
+        }
+        return $estadoChoferCamion;
+    }
+
+    private function loteCamion($loteCamion, $choferCamion)
+    {
+        $estadoLoteCamion = $this->estadoLoteCamion($loteCamion);
+        $estadoChoferCamion = $this->estadoChoferCamion($choferCamion);
+        if($estadoChoferCamion == 'En transito'){
+            return response()->json([
+            'mensaje' => 'Camión en transito'
+            ]);
+        }
+    
+        if($estadoLoteCamion != 3){
+            $plataforma = CamionPlataforma::where('ID_Camion', $choferCamion->ID_Camion)->first();
+        }
+    
+        return response()->json([
+            'mensaje' => 'Camión encontrado en plataforma',
+            'estadoLoteCamion' => $estadoLoteCamion,
+            'estadoChoferCamion' => $estadoChoferCamion,
+            'plataforma' => $plataforma->Numero_Plataforma,
+            'almacen' => $plataforma->ID_Almacen
+        ]);
+    }    
+    private function estadoNoTieneLote($camion)
+    {
+        $plataformaCamion = CamionPlataforma::where('ID_Camion', $camion->ID)->first();
+        if(!$plataformaCamion){
+            return response()->json(['mensaje' => 'Camion sin ubicacion, ni estado'], 402);
+        }
+
+        return response()->json([
+            'mensaje' => 'Camión en Plataforma',
+            'Plataforma' => $plataformaCamion -> Numero_Plataforma,
+            'Almacen' => $plataformaCamion -> ID_Almacen
+        ]);
+    }
 }
