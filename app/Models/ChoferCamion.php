@@ -8,12 +8,14 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class ChoferCamion
  * 
  * @property int $ID_Chofer
  * @property int $ID_Camion
+ * @property int $ID_Estado
  * @property Carbon $Fecha_Hora_Inicio
  * 
  * @property Camion $camion
@@ -24,14 +26,16 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ChoferCamion extends Model
 {
-	use \Illuminate\Database\Eloquent\SoftDeletes;
+	use SoftDeletes;
 	protected $table = 'chofer_camion';
+	protected $primaryKey = ['ID_Chofer', 'ID_Camion'];
 	public $incrementing = false;
 	public $timestamps = true;
 
 	protected $casts = [
 		'ID_Chofer' => 'int',
 		'ID_Camion' => 'int',
+		'ID_Estado'=> 'int',
 		'Fecha_Hora_Inicio' => 'datetime'
 	];
 

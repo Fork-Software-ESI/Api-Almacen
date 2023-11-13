@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FuncionarioController;
 use App\Http\Controllers\GerenteController;
+use App\Http\Controllers\ChoferController;
 use App\Http\Controllers\PruebaController;
 
 /*
@@ -52,3 +53,7 @@ Route::prefix('funcionario')->group(function () {
     Route::get('/lotes', [FuncionarioController::class, 'listarLotes']);
 });
 
+Route::prefix('chofer')->group(function () {
+    Route::get('/camion/{id}', [ChoferController::class, 'verContenidoCamion']);
+    Route::post('/camion/plataforma', [ChoferController::class, 'marcarHora']);
+});
