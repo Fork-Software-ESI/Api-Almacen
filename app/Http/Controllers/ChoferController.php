@@ -81,31 +81,37 @@ class ChoferController extends Controller
         $camionPlataformaSalida = CamionPlataformaSalida::where('ID_Camion', $camion->ID)->first();
 
         if($hora == 'llegada'){
-            if ($camionPlataforma->Fecha_Hora_Llegada !== null) {
-                return response()->json(['mensaje', 'El camión ya ha llegado']);
-            }
-
-            CamionPlataforma::where('ID_Camion', $camion->ID)->update(['Fecha_Hora_Llegada' => now()]);
-
-            $estadoc = ChoferCamion::where('ID_Camion', $camion->ID)->first();
-            $estadoc ->update([
-                'ID_Estado' => 2,
-            ]);
-
-            return response()->json(['mensaje','Se ha marcado la hora exitosamente']);
+            return $this->marcarLlegada($camionPlataforma, $camion);
         }
         
+        return $this->marcarSalida($camionPlataformaSalida, $camion);
+    }
+
+    private function marcarLlegada($camionPlataforma, $camion)
+    {
+        if ($camionPlataforma->Fecha_Hora_Llegada !== null) {
+            return response()->json(['mensaje', 'El camión ya ha llegado']);
+        }
+
+        CamionPlataforma::where('ID_Camion', $camion->ID)->update(['Fecha_Hora_Llegada' => now()]);
+
+        ChoferCamion::where('ID_Camion', $camion->ID)->update(['ID_Estado' => 2]);
+
+        return response()->json(['mensaje','Se ha marcado la hora exitosamente']);
+    }
+
+    private function marcarSalida($camionPlataformaSalida, $camion)
+    {
         if($camionPlataformaSalida->Fecha_Hora_Salida != null){
             return response()->json(['mensaje', 'El camión ya ha salido']);
         }
-
+    
         CamionPlataformaSalida::where('ID_Camion', $camion->ID)->update(['Fecha_Hora_Salida' => now()]);
-
+    
         ChoferCamion::where('ID_Camion', $camion->ID)->update(['ID_Estado' => 4]);
-        
+
         return response()->json(['mensaje','Se a marcado la hora exitosamente']);
     }
-
     public function liberarCamion(Request $request)
     {
         $ID_Chofer = $request->input('ID_Chofer');
