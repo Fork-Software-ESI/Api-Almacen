@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FuncionarioController;
 use App\Http\Controllers\GerenteController;
 use App\Http\Controllers\ChoferController;
-use App\Http\Controllers\PruebaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +42,7 @@ Route::prefix('gerente')->group(function () {
     Route::post('/camiones/lote', [GerenteController::class, 'asignarLoteCamion']);
     Route::get('/camiones/plataformas', [GerenteController::class, 'verCamionesEnPlataformas']);
     Route::get('/camiones/transito', [GerenteController::class, 'verCamionesEnTransito']);
+    Route::patch('/camiones', [GerenteController::class, 'marcarCamionComoPreparado']);
 });
 
 Route::prefix('funcionario')->group(function () {
@@ -50,7 +50,12 @@ Route::prefix('funcionario')->group(function () {
     Route::patch('/estante', [FuncionarioController::class, 'trasladarPaqueteEstante']);
     Route::delete('/estante', [FuncionarioController::class, 'quitarPaqueteDeEstante']);
 
+    Route::get('/paquetes', [FuncionarioController::class, 'listarPaquetesAlmacen']);
+
     Route::get('/lotes', [FuncionarioController::class, 'listarLotes']);
+    Route::get('/lotes/paquetes', [FuncionarioController::class, 'listarPaqueteLote']);
+    Route::patch('/lotes/paquetes', [FuncionarioController::class, 'actualizarPaqueteLote']);
+    Route::post('/lotes', [FuncionarioController::class, 'cargarLoteCamion']);
 });
 
 Route::prefix('chofer')->group(function () {

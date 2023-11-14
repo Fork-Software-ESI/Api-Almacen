@@ -40,7 +40,8 @@ class LoteCamion extends Model
 	protected $fillable = [
 		'ID_Camion',
 		'Fecha_Hora_Inicio',
-		'Estado'
+		'ID_Lote',
+		'ID_Estado'
 	];
 
 	public function camion()
