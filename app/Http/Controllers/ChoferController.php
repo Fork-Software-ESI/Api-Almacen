@@ -161,13 +161,26 @@ class ChoferController extends Controller
             return response()->json(['mensaje' => 'Chofer no encontrado'], 402);
         }
 
-        $choferCamion = ChoferCamion::where('ID_Chofer', $validatedData['ID_Chofer'])->first();
+        $choferCamion = ChoferCamion::where('ID_Chofer', $validatedData['ID_Chofer'])->whereNull('deleted_at')->first();
         if(!$choferCamion){
             return response()->json(['mensaje' => 'Chofer no tiene camión asignado'], 402);
         }
 
-        ChoferCamionManeja::where('ID_Chofer', $validatedData['ID_Chofer'])->update(['Fecha_Hora_Fin' => now()]);
+        $choferCamionManeja = ChoferCamionManeja::where('ID_Chofer', $validatedData['ID_Chofer'])->whereNull('deleted_at')->first();
+        if($choferCamionManeja){
+            return response()->json(['mensaje' => 'Ya liberaste a ese camion'], 402);
+        }
 
+        ChoferCamionManeja::create([
+            'ID_Chofer' => $validatedData['ID_Chofer'],
+            'ID_Camion' => $choferCamion->ID_Camion,
+            'Fecha_Hora_Fin' => now(),
+        ]);
+
+        ChoferCamion::where('ID_Chofer', $validatedData['ID_Chofer'])
+            ->where('ID_Camion', $choferCamion->ID_Camion)
+            ->update(['ID_Estado' => 5]);
+        
         return response()->json(['mensaje' => 'Chofer ha sido liberado']);
     }
 

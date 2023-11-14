@@ -28,6 +28,8 @@ class ChoferCamionManeja extends Model
 	public $incrementing = false;
 	public $timestamps = true;
 
+	protected $primaryKey = ['ID_Chofer', 'ID_Camion'];
+
 	protected $casts = [
 		'ID_Chofer' => 'int',
 		'ID_Camion' => 'int',
@@ -35,6 +37,8 @@ class ChoferCamionManeja extends Model
 	];
 
 	protected $fillable = [
+		'ID_Chofer',
+		'ID_Camion',
 		'Fecha_Hora_Fin'
 	];
 
