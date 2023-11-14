@@ -41,6 +41,7 @@ Route::prefix('gerente')->group(function () {
     Route::post('/camiones/lote', [GerenteController::class, 'asignarLoteCamion']);
     Route::get('/camiones/plataformas', [GerenteController::class, 'verCamionesEnPlataformas']);
     Route::get('/camiones/transito', [GerenteController::class, 'verCamionesEnTransito']);
+    Route::patch('/camiones', [GerenteController::class, 'marcarCamionComoPreparado']);
 });
 
 Route::prefix('funcionario')->group(function () {
@@ -53,4 +54,5 @@ Route::prefix('funcionario')->group(function () {
     Route::get('/lotes', [FuncionarioController::class, 'listarLotes']);
     Route::get('/lotes/paquetes', [FuncionarioController::class, 'listarPaqueteLote']);
     Route::patch('/lotes/paquetes', [FuncionarioController::class, 'actualizarPaqueteLote']);
+    Route::post('/lotes', [FuncionarioController::class, 'cargarLoteCamion']);
 });
