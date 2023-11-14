@@ -13,6 +13,7 @@ use App\Models\Camion;
 use App\Models\CamionPlataforma;
 use App\Models\CamionPlataformaSalida;
 use App\Models\ChoferCamionManeja;
+use Illuminate\Support\Facades\Validator;
 
 class ChoferController extends Controller
 {
@@ -64,10 +65,18 @@ class ChoferController extends Controller
 
     public function marcarHora(Request $request)
     {
-        $matricula = $request->input('matricula');
-        $hora = $request->input('hora');
+        $validator = Validator::make($request->all(), [
+            'Matricula' => 'required|exists:camion,Matricula',
+            'Hora' => 'required|in:llegada,salida'
+        ]);
 
-        $camion = Camion::where('Matricula', $matricula)->first();
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $validatedData = $validator->validated();
+
+        $camion = Camion::where('Matricula', $validatedData['Matricula'])->first();
         if (!$camion) {
             return response()->json(['mensaje', 'Camión no encontrado']);
         }
@@ -80,7 +89,7 @@ class ChoferController extends Controller
 
         $camionPlataformaSalida = CamionPlataformaSalida::where('ID_Camion', $camion->ID)->first();
 
-        if($hora == 'llegada'){
+        if($validatedData['Hora'] == 'llegada'){
             return $this->marcarLlegada($camionPlataforma, $camion);
         }
         
@@ -137,20 +146,27 @@ class ChoferController extends Controller
     }
     public function liberarCamion(Request $request)
     {
-        $ID_Chofer = $request->input('ID_Chofer');
+        $validator = Validator::make($request->all(), [
+            'ID_Chofer' => 'required|exists:chofer,ID',
+        ]);
 
-        $chofer = Chofer::find($ID_Chofer);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+        $validatedData = $validator->validated();
+
+        $chofer = Chofer::find($validatedData['ID_Chofer']);
 
         if(!$chofer){
             return response()->json(['mensaje' => 'Chofer no encontrado'], 402);
         }
 
-        $choferCamion = ChoferCamion::where('ID_Chofer', $ID_Chofer)->first();
+        $choferCamion = ChoferCamion::where('ID_Chofer', $validatedData['ID_Chofer'])->first();
         if(!$choferCamion){
             return response()->json(['mensaje' => 'Chofer no tiene camión asignado'], 402);
         }
 
-        ChoferCamionManeja::where('ID_Chofer', $ID_Chofer)->update(['Fecha_Hora_Fin' => now()]);
+        ChoferCamionManeja::where('ID_Chofer', $validatedData['ID_Chofer'])->update(['Fecha_Hora_Fin' => now()]);
 
         return response()->json(['mensaje' => 'Chofer ha sido liberado']);
     }
@@ -250,9 +266,15 @@ class ChoferController extends Controller
 
     public function paqueteEntregado(Request $request)
     {
-        $ID_Paquete = $request->input('ID_Paquete');
+        $validator = Validator::make($request->all(), [
+            'ID_Paquete' => 'required|exists:paquete,ID',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+        $validatedData = $validator->validated();
 
-        $paquete = Paquete::where('ID', $ID_Paquete)->first();
+        $paquete = Paquete::where('ID', $validatedData['ID_Paquete'])->first();
         if (!$paquete) {
             return response()->json(['mensaje' => 'Paquete no encontrado']);
         }
@@ -261,7 +283,7 @@ class ChoferController extends Controller
             return response()->json(['mensaje' => 'Paquete ya entregado']);
         }
 
-        $paqueteLote = Forma::where('ID_Paquete', $ID_Paquete)->first();
+        $paqueteLote = Forma::where('ID_Paquete', $validatedData['ID_Paquete'])->first();
         if (!$paqueteLote) {
             return response()->json(['mensaje' => 'Paquete no asignado a un lote']);
         }
