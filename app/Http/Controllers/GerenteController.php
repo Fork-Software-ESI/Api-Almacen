@@ -81,7 +81,7 @@ class GerenteController extends Controller
             return response()->json(['error' => 'Gerente no encontrado'], 404);
         }
 
-        $direccion = $validatedData['Calle'] . ' ' . $validatedData['Numero_Puerta'] . ', ' . $validatedData['Ciudad'];
+        $direccion = $validatedData['Calle'] . ', ' . $validatedData['Numero_Puerta'] . ', ' . $validatedData['Ciudad'];
 
         $direccionValida = $this->validarDireccion($direccion);
 
@@ -138,7 +138,7 @@ class GerenteController extends Controller
         $paquete = Paquete::findOrFail($validatedData['ID']);
 
         if (isset($validatedData['Calle']) || isset($validatedData['Numero_Puerta']) || isset($validatedData['Ciudad'])) {
-            $direccion = $validatedData['Calle'] . ' ' . $validatedData['Numero_Puerta'] . ', ' . $validatedData['Ciudad'];
+            $direccion = $validatedData['Calle'] . ', ' . $validatedData['Numero_Puerta'] . ', ' . $validatedData['Ciudad'];
 
             $direccionValida = $this->validarDireccion($direccion);
 
