@@ -559,6 +559,55 @@ class GerenteController extends Controller
             'Peso_Kg' => $lote->Peso_Kg,
         ]);
 
+
+
         return response()->json(['success' => 'Lote ' . $loteCamionCreado->ID_Lote . ' asignado a camión ' . $loteCamionCreado->ID_Camion], 200);
+    }
+
+    public function marcarCamionComoPreparado(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ID_Chofer' => 'required|exists:chofer_camion,ID_Chofer',
+            'ID_Camion' => 'required|exists:chofer_camion,ID_Camion'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $validatedData = $validator->validated();
+
+        $choferCamion = ChoferCamion::where('ID_Chofer', $validatedData['ID_Chofer'])->where('ID_Camion', $validatedData['ID_Camion'])->whereNull('deleted_at')->first();
+
+        $lotesCamion = LoteCamion::where('ID_Camion', $validatedData['ID_Camion'])->whereNull('deleted_at')->get();
+
+        if ($choferCamion === null) {
+            return response()->json(['error' => 'Chofer y camión no encontrados'], 404);
+        }
+
+        if ($choferCamion->ID_Estado != 2) {
+            return response()->json(['error' => 'Chofer camión no disponibles'], 422);
+        }
+
+        $lotesListos = true;
+
+        foreach ($lotesCamion as $lote) {
+            if ($lote->ID_Estado != 2) {
+                $lotesListos = false;
+                break;
+            }
+        }
+
+        if (!$lotesListos) {
+            return response()->json(['error' => 'No todos los lotes están listos'], 422);
+        }
+
+        $choferCamion->ID_Estado = 3;
+
+        ChoferCamion::where('ID_Chofer', $validatedData['ID_Chofer'])->where('ID_Camion', $validatedData['ID_Camion'])->whereNull('deleted_at')->update([
+            'ID_Estado' => 3
+        ]);
+
+        return response()->json(['success' => 'Camión ' . $choferCamion->ID_Camion . ' listo para salir'], 200);
     }
 }
