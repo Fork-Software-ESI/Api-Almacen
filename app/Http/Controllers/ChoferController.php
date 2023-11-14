@@ -247,4 +247,71 @@ class ChoferController extends Controller
             'Almacen' => $plataformaCamion -> ID_Almacen
         ]);
     }
+
+    public function paqueteEntregado(Request $request)
+    {
+        $ID_Paquete = $request->input('ID_Paquete');
+
+        $paquete = Paquete::where('ID', $ID_Paquete)->first();
+        if (!$paquete) {
+            return response()->json(['mensaje' => 'Paquete no encontrado']);
+        }
+
+        if($paquete->ID_Estado == 4){
+            return response()->json(['mensaje' => 'Paquete ya entregado']);
+        }
+
+        $paqueteLote = Forma::where('ID_Paquete', $ID_Paquete)->first();
+        if (!$paqueteLote) {
+            return response()->json(['mensaje' => 'Paquete no asignado a un lote']);
+        }
+
+        $loteCamion = LoteCamion::where('ID_Lote', $paqueteLote->ID_Lote)->first();
+        if (!$loteCamion) {
+            return response()->json(['mensaje' => 'Lote no asignado a un camion']);
+        }
+
+        $lote = Lote::where('ID', $loteCamion->ID_Lote)->first();
+
+        $choferCamion = ChoferCamion::where('ID_Camion', $loteCamion->ID_Camion)->first();
+
+        $paquete -> update([
+            'ID_Estado' => 4,
+        ]);
+
+        $paqueteLote -> update([
+            'ID_Estado' => 3,
+        ]);
+
+        $forma = Forma::where('ID_Lote', $lote->ID)->get();
+
+        $paquetesEntregados = 1;
+        foreach($forma as $formas){
+            $paquetes = Paquete::where('ID', $formas->ID_Paquete)->first();
+            if($paquetes && $paquetes->ID_Estado != 4){
+                $paquetesEntregados = 0;
+                break;
+            }
+        }
+
+        if($paquetesEntregados == 1){
+            Lote::where('ID', $lote->ID)
+                ->update([
+                    'ID_Estado' => 3,
+                ]);
+
+            LoteCamion::where('ID_Lote', $lote->ID)
+                ->update([
+                    'ID_Estado' => 3,
+                ]);
+
+            ChoferCamion::where('ID_Chofer', $choferCamion->ID_Chofer)
+                ->where('ID_Camion', $choferCamion->ID_Camion)
+                ->update([
+                    'ID_Estado' => 5,
+                ]);
+        }
+
+        return response()->json(['mensaje' => 'Paquete entregado con éxito']);
+    }
 }
