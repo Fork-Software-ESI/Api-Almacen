@@ -105,12 +105,35 @@ class ChoferController extends Controller
         if($camionPlataformaSalida->Fecha_Hora_Salida != null){
             return response()->json(['mensaje', 'El camión ya ha salido']);
         }
-    
         CamionPlataformaSalida::where('ID_Camion', $camion->ID)->update(['Fecha_Hora_Salida' => now()]);
-    
         ChoferCamion::where('ID_Camion', $camion->ID)->update(['ID_Estado' => 4]);
 
+        $loteCamion = LoteCamion::where('ID_Camion', $camion->ID)->first();
+        if($loteCamion){
+            $this->loteCamionSalida($loteCamion);
+        }
+
         return response()->json(['mensaje','Se a marcado la hora exitosamente']);
+    }
+    private function loteCamionSalida($loteCamion)
+    {
+        $loteCamion -> update(['ID_Estado' => 2]);
+        $lote = Lote::where('ID', $loteCamion->ID_Lote)->first();
+        if($lote){
+            $this->lote($lote);
+        }
+    }
+    private function lote($lote)
+    {
+        $lote -> update(['ID_Estado' => 2]);
+        $formas = Forma::where('ID_Lote', $lote->ID)->get();
+        foreach($formas as $forma){
+            $forma -> update(['ID_Estado' => 2]);        
+            $paquete = Paquete::where('ID', $forma->ID_Paquete)->first();
+            if($paquete){
+                $paquete -> update(['ID_Estado' => 3]);
+            }
+        }
     }
     public function liberarCamion(Request $request)
     {
