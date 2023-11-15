@@ -188,6 +188,29 @@ class GerenteController extends Controller
         return response()->json(['Paquete' => $paquete], 200);
     }
 
+    public function buscarLote(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ID_Gerente' => 'required|exists:gerente_almacen,ID_Gerente',
+            'ID_Lote' => 'required|numeric|exists:lote,ID',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validatedData = $validator->validated();
+        $lote = Lote::where('ID', $validatedData['ID_Lote'])
+            ->whereHas('gerente_lote', function ($query) use ($validatedData) {
+                $query->where('ID_Gerente', $validatedData['ID_Gerente']);
+            })
+            ->whereNull('deleted_at')
+            ->whereIn('ID_Estado', [1, 2])
+            ->first();
+
+        if (!$lote) {
+            return response()->json(['error' => 'Lote no asociado al gerente'], 404);
+        }
+        return response()->json(['Lote' => $lote], 200);
+    }
     public function crearLote(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -202,10 +225,12 @@ class GerenteController extends Controller
 
         $validatedData = $validator->validated();
 
+        $validatedData['ID_Estado'] = 1;
+
         $lote = Lote::create([
             'Descripcion' => $validatedData['Descripcion'],
             'Peso_Kg' => $validatedData['Peso_Kg'],
-            'ID_Estado' => 1,
+            'ID_Estado' => $validatedData['ID_Estado']
         ]);
 
         GerenteLote::create([
@@ -300,6 +325,7 @@ class GerenteController extends Controller
             'ID' => 'required|exists:lote,ID',
             'Descripcion' => 'string',
             'Peso_Kg' => 'numeric|min:1',
+            'ID_Estado' => 'exists:estadol,ID',
         ]);
 
         if ($validator->fails()) {
@@ -315,19 +341,9 @@ class GerenteController extends Controller
         return response()->json(['success' => 'Lote ' . $lote->ID . ' editado'], 200);
     }
 
-    public function eliminarLote(Request $request)
+    public function eliminarLote($id)
     {
-        $validator = Validator::make($request->all(), [
-            'ID_Lote' => 'required|exists:lote,ID',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
-
-        $validatedData = $validator->validated();
-
-        $lote = Lote::findOrFail($validatedData['ID']);
+        $lote = Lote::findOrFail($id);
         Forma::where('ID_Lote', $lote->ID)->delete();
         CamionLlevaLote::where('ID_Lote', $lote->ID)->delete();
         LoteCamion::where('ID_Lote', $lote->ID)->delete();
