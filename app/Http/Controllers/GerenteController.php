@@ -125,7 +125,7 @@ class GerenteController extends Controller
             'ID_Cliente' => 'exists:cliente,ID',
             'ID_Estado' => 'exists:estadop,ID',
             'Calle' => 'string',
-            'Numero_Puerta' => 'string',
+            'Numero_Puerta' => 'numeric',
             'Ciudad' => 'string',
         ]);
 
@@ -176,9 +176,9 @@ class GerenteController extends Controller
         $validatedData = $validator->validated();
 
         if (isset($validatedData['Codigo'])) {
-            $paquete = Paquete::withTrashed()->where('Codigo', $validatedData['Codigo'])->first();
+            $paquete = Paquete::where('Codigo', $validatedData['Codigo'])->whereNull('deleted_at')->first();
         } else {
-            $paquete = Paquete::withTrashed()->where('ID_Cliente', $validatedData['ID_Cliente'])->get();
+            $paquete = Paquete::where('ID_Cliente', $validatedData['ID_Cliente'])->whereNull('deleted_at')->get();
         }
 
         if ($paquete == null) {
@@ -193,7 +193,7 @@ class GerenteController extends Controller
         $validator = Validator::make($request->all(), [
             'Descripcion' => 'string',
             'Peso_Kg' => 'numeric|required|min:1',
-            'ID_Gerente' => 'required|exists:gerente_almacen,ID',
+            'ID_Gerente' => 'required|exists:gerente_almacen,ID_Gerente',
         ]);
 
         if ($validator->fails()) {
@@ -202,7 +202,11 @@ class GerenteController extends Controller
 
         $validatedData = $validator->validated();
 
-        $lote = Lote::create($validatedData);
+        $lote = Lote::create([
+            'Descripcion' => $validatedData['Descripcion'],
+            'Peso_Kg' => $validatedData['Peso_Kg'],
+            'ID_Estado' => 1,
+        ]);
 
         GerenteLote::create([
             'ID_Gerente' => $validatedData['ID_Gerente'],
