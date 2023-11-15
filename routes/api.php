@@ -26,9 +26,10 @@ Route::prefix('gerente')->group(function () {
 
     Route::post('/lotes', [GerenteController::class, 'crearLote']);
     Route::get('/lotes', [GerenteController::class, 'listarLotes']);
+    Route::get('/lotes/buscar', [GerenteController::class, 'buscarLote']);
     Route::post('/lotes/asignar', [GerenteController::class, 'asignarPaqueteLote']);
     Route::patch('/lotes', [GerenteController::class, 'editarLote']);
-    Route::delete('/lotes', [GerenteController::class, 'eliminarLote']);
+    Route::delete('/lotes/{id}', [GerenteController::class, 'eliminarLote']);
 
 
     Route::get('/choferes', [GerenteController::class, 'verChoferes']);

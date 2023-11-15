@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $ID
  * @property string|null $Descripcion
  * @property int $Peso_Kg
+ * @property int $ID_Estado
  * 
  * @property Collection|Forma[] $formas
  * @property GerenteLote $gerente_lote
@@ -30,12 +31,15 @@ class Lote extends Model
 	public $timestamps = true;
 
 	protected $casts = [
-		'Peso_Kg' => 'int'
+		'Descripcion' => 'string',
+		'Peso_Kg' => 'int',
+		'ID_Estado' => 'int'
 	];
 
 	protected $fillable = [
 		'Descripcion',
-		'Peso_Kg'
+		'Peso_Kg',
+		'ID_Estado'
 	];
 
 	public function formas()
