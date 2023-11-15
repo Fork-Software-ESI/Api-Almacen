@@ -514,54 +514,53 @@ class GerenteController extends Controller
 
         $validatedData = $validator->validated();
 
-        try {
-            $lote = Lote::where('ID', $validatedData['ID_Lote'])->whereNull('deleted_at')->firstOrFail();
-            $camion = ChoferCamion::where('ID_Camion', $validatedData['ID_Camion'])->whereNull('deleted_at')->firstOrFail();
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Lote o camión no encontrado'], 404);
+        $camion = Camion::findOrFail($validatedData['ID_Camion'])->whereNull('deleted_at')->first();
+        $lote = Lote::where('ID', $validatedData['ID_Lote'])->whereNull('deleted_at')->first();
+        $lotesCamion = LoteCamion::where('ID_Lote', $lote->ID)->whereNull('deleted_at')->get();
+
+
+        if ($lotesCamion->count() > 0) {
+            return response()->json(['error' => 'Lote ya asignado a un camión'], 422);
+        }
+
+        if ($lotesCamion->count() > 0) {
+            return response()->json(['error' => 'Lote ya asignado a un camión'], 422);
+        }
+
+        $forma = Forma::where('ID_Lote', $lote->ID)->whereNull('deleted_at')->get();
+
+        if (!$forma) {
+            return response()->json(['error' => 'El lote está vacío'], 422);
+        }
+
+        $choferCamion = ChoferCamion::where('ID_Camion', $camion->ID)->whereNull('deleted_at')->first();
+
+        if (!$choferCamion) {
+            return response()->json(['error' => 'Camión no asignado a un chofer'], 422);
+        }
+
+        if ($choferCamion->ID_Estado !== 2 && $choferCamion->ID_Estado !== 1) {
+            return response()->json(['error' => 'Camión no disponible'], 422);
         }
 
         if ($lote->ID_Estado != 1) {
             return response()->json(['error' => 'Lote no disponible'], 422);
         }
 
-        $response = $this->verCamionesDisponibles();
-        $camionesDisponiblesData = json_decode($response->getContent(), true);
-        $camionesDisponibles = $camionesDisponiblesData['Camiones disponibles'];
-        $camionDeseado = null;
+        $pesoTotalKg = Paquete::whereIn('ID', $forma->pluck('ID_Paquete')->toArray())->sum('Peso_Kg') + $lote->Peso_Kg;
 
-        foreach ($camionesDisponibles as $camion) {
-            if ($camion['ID_Camion'] == $validatedData['ID_Camion']) {
-                $camionDeseado = $camion;
-                break;
-            }
+        if ($pesoTotalKg > $camion->PesoMaximoKg) {
+            return response()->json(['error' => 'Camión no tiene capacidad suficiente'], 422);
         }
 
-        if ($camionDeseado === null) {
-            return response()->json(['error' => 'Camión no disponible'], 404);
-        }
-
-        $loteEnCamion = LoteCamion::where('ID_Lote', $validatedData['ID_Lote'])->whereNull('deleted_at')->first();
-        if ($loteEnCamion !== null) {
-            return response()->json(['error' => 'Lote ya asignado a un camión'], 422);
-        }
-
-        $pesoTotalKg = LoteCamion::where('ID_Camion', $validatedData['ID_Camion'])->whereNull('deleted_at')->sum('Peso_Kg') + $lote->Peso_Kg;
-        if ($pesoTotalKg > $camionDeseado['PesoMaximoKg']) {
-            return response()->json(['error' => 'El peso total asignado al camión es superior al límite permitido'], 422);
-        }
-
-        $loteCamionCreado = LoteCamion::create([
-            'ID_Lote' => $validatedData['ID_Lote'],
-            'ID_Camion' => $validatedData['ID_Camion'],
+        LoteCamion::create([
+            'ID_Lote' => $lote->ID,
+            'ID_Camion' => $camion->ID,
             'Fecha_Hora_Inicio' => now(),
-            'ID_Estado' => 1,
-            'Peso_Kg' => $lote->Peso_Kg,
+            'ID_Estado' => 1
         ]);
 
-
-
-        return response()->json(['success' => 'Lote ' . $loteCamionCreado->ID_Lote . ' asignado a camión ' . $loteCamionCreado->ID_Camion], 200);
+        return response()->json(['success' => 'Lote ' . $lote->ID . ' asignado a camión ' . $camion->ID], 200);
     }
 
     public function marcarCamionComoPreparado(Request $request)
